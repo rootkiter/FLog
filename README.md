@@ -22,7 +22,7 @@ func main() {
     loghandle.Init(
         "/tmp",        // Log directory
         "logtest",     // Log name (file name prompt)
-        1*1000         // Create a new file every second
+        1*1000,        // Create a new file every second
     )
     loghandle.WriteLogString("HELLO") // Record a log
 
