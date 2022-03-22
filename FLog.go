@@ -46,6 +46,7 @@ func (self *FLog) WriteString (
         if err != nil {
             self.handle = nil
         } else {
+            self.Close()
             self.handle = handle
         }
         self.nexttms = tms + self.limittms
