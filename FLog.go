@@ -11,6 +11,7 @@ import (
     "fmt"
     "time"
     "path"
+    "encoding/hex"
 )
 
 type FLog struct {
@@ -60,6 +61,12 @@ func (self *FLog) WriteLogString ( logstr string ) {
     tms := time.Now().Unix()*1000
     logstring := fmt.Sprintf("%d\t%s\n", tms/1000, logstr)
     self.WriteString(tms, logstring)
+}
+
+func (self *FLog) WriteLogHex(logbts []byte) {
+    hexbuf := make([]byte, len(logbts)*2)
+    hex.Encode(hexbuf, logbts[:])
+    self.WriteLogString(string(hexbuf))
 }
 
 func (self *FLog) Close () {
