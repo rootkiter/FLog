@@ -14,25 +14,28 @@ import (
     "encoding/hex"
 )
 
+type logitem struct {
+    tms    int64
+    logstr string
+}
+
 type FLog struct {
     directory string
     name      string
     nexttms   int64
     limittms  int64
     handle    *os.File
+    wchan     chan logitem
 }
 
-func (self *FLog) Init (
-    directory string, name string, limittms int64,
-) *FLog {
-    self.directory = directory
-    self.name      = name
-    self.limittms  = limittms
-    self.nexttms   = 0
-    return self
+func (self *FLog) startRoutine () {
+    for {
+        item := <-self.wchan
+        self.writeString(item.tms, item.logstr)
+    }
 }
 
-func (self *FLog) WriteString (
+func (self *FLog) writeString (
     tms int64, logstr string,
 ) {
     if tms > self.nexttms || self.handle == nil {
@@ -57,10 +60,25 @@ func (self *FLog) WriteString (
     }
 }
 
+
+func (self *FLog) Init (
+    directory string, name string, limittms int64,
+) *FLog {
+    self.directory = directory
+    self.name      = name
+    self.limittms  = limittms
+    self.nexttms   = 0
+    self.wchan     = make(chan logitem, 2048)
+    go self.startRoutine()
+    return self
+}
+
 func (self *FLog) WriteLogString ( logstr string ) {
     tms := time.Now().Unix()*1000
     logstring := fmt.Sprintf("%d\t%s\n", tms/1000, logstr)
-    self.WriteString(tms, logstring)
+
+    item := logitem{tms, logstring}
+    self.wchan <- item
 }
 
 func (self *FLog) WriteLogHex(logbts []byte) {
