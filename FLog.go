@@ -68,17 +68,25 @@ func (self *FLog) Init (
     self.name      = name
     self.limittms  = limittms
     self.nexttms   = 0
+    self.wchan     = nil
+    return self
+}
+
+func (self *FLog) RoutineWay () {
     self.wchan     = make(chan logitem, 2048)
     go self.startRoutine()
-    return self
 }
 
 func (self *FLog) WriteLogString ( logstr string ) {
     tms := time.Now().Unix()*1000
     logstring := fmt.Sprintf("%d\t%s\n", tms/1000, logstr)
 
-    item := logitem{tms, logstring}
-    self.wchan <- item
+    if self.wchan != nil {
+        item := logitem{tms, logstring}
+        self.wchan <- item
+    } else {
+        self.writeString(tms, logstring)
+    }
 }
 
 func (self *FLog) WriteLogHex(logbts []byte) {
