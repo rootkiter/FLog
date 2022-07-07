@@ -79,7 +79,7 @@ func (self *FLog) RoutineWay () {
 
 func (self *FLog) WriteLogString ( logstr string ) {
     tms := time.Now().Unix()*1000
-    logstring := fmt.Sprintf("%d\t%s\n", tms/1000, logstr)
+    logstring := logstr
 
     if self.wchan != nil {
         item := logitem{tms, logstring}
